@@ -1,0 +1,28 @@
+name: Pages
+
+on:
+  push:
+    branches:
+      - master # default branch
+
+jobs:
+  pages:
+    runs-on: debian:buster-slim
+    permissions:
+      contents: write
+    before_script:
+      - apt-get update
+      - apt-get -y install pandoc r-base
+      - R -e "install.packages('blogdown', repos='https://cran.rstudio.com/')"
+      - R -e "blogdown::install_hugo()"
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build
+        run: R -e "blogdown::build_site()"
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
